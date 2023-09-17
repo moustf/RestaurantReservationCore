@@ -1,3 +1,11 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using RestaurantReservation.DB.EFContext;
 
-Console.WriteLine("Hello, World!");
+using var context = new RestaurantContext();
+
+var isCreated = context.Database.EnsureCreated();
+
+Console.WriteLine(
+    isCreated
+        ? "The database got created successfully!"
+        : "The database have not gotten created!"
+    );
