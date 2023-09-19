@@ -1,11 +1,30 @@
-﻿using RestaurantReservation.DB.EFContext;
+﻿using Microsoft.EntityFrameworkCore;
+using RestaurantReservation.DB.EFContext;
+using RestaurantReservation.DB.InitialData;
 
-using var context = new RestaurantContext();
+var context = new RestaurantContext();
+    
+try
+{
+    await context.Database.OpenConnectionAsync();
+    
+    var seedData = new SeedData();
+    await seedData.InitializeDbWithData(context);
 
-var isCreated = context.Database.EnsureCreated();
+    var restaurants = context.Restaurants.ToList();
 
-Console.WriteLine(
-    isCreated
-        ? "The database got created successfully!"
-        : "The database have not gotten created!"
-    );
+    foreach (var restaurant in restaurants)
+    {
+        Console.WriteLine($"{restaurant.RestaurantId} - {restaurant.Name}");
+    }
+
+}
+catch (Exception e)
+{
+    Console.WriteLine(e);
+    throw;
+}
+finally
+{
+    await context.Database.CloseConnectionAsync();
+}
