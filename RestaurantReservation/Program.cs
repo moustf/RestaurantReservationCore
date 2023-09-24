@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RestaurantReservation.DB.EFContext;
-using RestaurantReservation.DB.EntitiesCrud;
+using RestaurantReservation.DB.Queries;
 using RestaurantReservation.DB.Exceptions;
 using RestaurantReservation.DB.InitialData;
 using RestaurantReservation.DB.Models;
@@ -14,7 +14,8 @@ try
     var initializeData = new SeedData();
     await initializeData.InitializeDbWithData(context);
 
-    await CrudOperateOnEntities(context);
+    // await CrudOperateOnEntities(context);
+    QueryEntities(context);
 }
 catch (RecordExistsException e)
 {
@@ -38,7 +39,7 @@ finally
 
 async Task CrudOperateOnEntities(RestaurantContext context)
 {
-    var crudOperate = new CrudOperate(context);
+    var crudOperate = new EntitiesCrudOperate(context);
     
     #region Customer
 
@@ -615,4 +616,42 @@ async Task CrudOperateOnEntities(RestaurantContext context)
     Console.WriteLine("Employee in the orders region got deleted successfully!");
 
     #endregion
+}
+
+async void QueryEntities(RestaurantContext context)
+{
+    var entitiesQuery = new EntitiesQuery(context);
+
+    var managers = entitiesQuery.ListManagers();
+    var reservations = entitiesQuery.GetReservationsByCustomer(1);
+    var orderAndItems = entitiesQuery.ListOrdersAndMenuItems(1);
+    var menuItems = entitiesQuery.ListOrderedMenuItems(1);
+    var amountAverage = await entitiesQuery.CalculateAverageOrderAmount(1);
+    
+    Console.WriteLine($"The total amount for the employee: {amountAverage}");
+    
+    foreach (var manager in managers)
+    {
+        Console.WriteLine($"{manager.EmployeeId} - {manager.FirstName} {manager.LastName} - {manager.Position}.");
+    }
+    
+    foreach (var reservation in reservations)
+    {
+        Console.WriteLine($"{reservation.ReservationId} - {reservation.ReservationDate} {reservation.PartySize}.");
+    }
+    
+    foreach (var order in orderAndItems)
+    {
+        Console.WriteLine($"Order: {order.OrderId} - {order.OrderDate} {order.TotalAmount}.");
+        if (order.OrderItems.Count > 0) Console.WriteLine("The items are: ");
+        foreach (var orderItem in order.OrderItems)
+        {
+            Console.WriteLine($"Item: {orderItem.MenuItem.ItemId} - {orderItem.MenuItem.Name} - {orderItem.MenuItem.Description} - {orderItem.MenuItem.Price}.");
+        }
+    }
+    
+    foreach (var menuItem in menuItems)
+    {
+        Console.WriteLine($"Item: {menuItem.ItemId} - {menuItem.Name} - {menuItem.Description} - {menuItem.Price}.");
+    }
 }

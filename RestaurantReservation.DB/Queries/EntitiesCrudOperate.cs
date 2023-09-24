@@ -2,7 +2,7 @@ using RestaurantReservation.DB.EFContext;
 using RestaurantReservation.DB.Exceptions;
 using RestaurantReservation.DB.Models;
 
-namespace RestaurantReservation.DB.EntitiesCrud;
+namespace RestaurantReservation.DB.Queries;
 
 public class EntitiesCrudOperate
 {
