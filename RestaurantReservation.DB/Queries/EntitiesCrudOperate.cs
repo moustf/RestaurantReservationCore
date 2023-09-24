@@ -4,11 +4,11 @@ using RestaurantReservation.DB.Models;
 
 namespace RestaurantReservation.DB.EntitiesCrud;
 
-public class CrudOperate
+public class EntitiesCrudOperate
 {
     private readonly RestaurantContext _restaurantContext;
 
-    public CrudOperate(RestaurantContext restaurantContext)
+    public EntitiesCrudOperate(RestaurantContext restaurantContext)
     {
         _restaurantContext = restaurantContext;
     }
