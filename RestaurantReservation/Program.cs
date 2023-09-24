@@ -15,7 +15,7 @@ try
     await initializeData.InitializeDbWithData(context);
 
     // await CrudOperateOnEntities(context);
-    QueryEntities(context);
+    await QueryEntities(context);
 }
 catch (RecordExistsException e)
 {
@@ -618,7 +618,7 @@ async Task CrudOperateOnEntities(RestaurantContext context)
     #endregion
 }
 
-async void QueryEntities(RestaurantContext context)
+async Task QueryEntities(RestaurantContext context)
 {
     var entitiesQuery = new EntitiesQuery(context);
 
@@ -627,8 +627,12 @@ async void QueryEntities(RestaurantContext context)
     var orderAndItems = entitiesQuery.ListOrdersAndMenuItems(1);
     var menuItems = entitiesQuery.ListOrderedMenuItems(1);
     var amountAverage = await entitiesQuery.CalculateAverageOrderAmount(1);
+    var restaurantRevenue = await entitiesQuery.CalculateRestaurantRevenue(1);
+    var customers = await entitiesQuery.CustomerReservationsWithPartySizeGreaterThan(5);
     
     Console.WriteLine($"The total amount for the employee: {amountAverage}");
+
+    Console.WriteLine($"Restaurant revenue is: {restaurantRevenue}");
     
     foreach (var manager in managers)
     {
@@ -653,5 +657,10 @@ async void QueryEntities(RestaurantContext context)
     foreach (var menuItem in menuItems)
     {
         Console.WriteLine($"Item: {menuItem.ItemId} - {menuItem.Name} - {menuItem.Description} - {menuItem.Price}.");
+    }
+
+    foreach (var customer in customers)
+    {
+        Console.WriteLine($"The customer: {customer.CustomerId} - {customer.FirstName} {customer.LastName} - {customer.Email} - {customer.PhoneNumber}");
     }
 }
