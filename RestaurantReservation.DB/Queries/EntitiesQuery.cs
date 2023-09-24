@@ -1,3 +1,5 @@
+using System.Data;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using RestaurantReservation.DB.EFContext;
 using RestaurantReservation.DB.Models;
@@ -51,5 +53,16 @@ public class EntitiesQuery
             """,
             restaurantId
         );
+    }
+    
+    public async Task<List<Customer>> CustomerReservationsWithPartySizeGreaterThan(int partySize)
+    {
+        const string sql = "EXEC sp_CustomerReservationsWithPartySizeGreaterThan @partySizeParam;";
+        var parameters = new SqlParameter("@partySizeParam", SqlDbType.Int)
+        {
+            Value = partySize
+        };
+
+        return await _restaurantContext.Customers.FromSqlRaw(sql, parameters).ToListAsync();
     }
 }
