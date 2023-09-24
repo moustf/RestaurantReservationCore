@@ -39,4 +39,17 @@ public class EntitiesQuery
     {
         return await _restaurantContext.Orders.Where(o => o.EmployeeId == employeeId).AverageAsync(o => o.TotalAmount);
     }
+
+    public async Task<decimal> CalculateRestaurantRevenue(int restaurantId)
+    {
+        return (decimal) await _restaurantContext.Database.ExecuteSqlRawAsync(
+            """
+                DECLARE @revenue DECIMAL(12, 4);
+                EXEC @revenue = dbo.fn_RestaurantTotalRevenue @restaurant_id = {0};
+                
+                SELECT @revenue
+            """,
+            restaurantId
+        );
+    }
 }
