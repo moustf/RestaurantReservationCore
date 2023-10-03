@@ -33,10 +33,52 @@ public class RestaurantContext : DbContext
 
         modelBuilder
             .Entity<Reservation>()
+            .HasOne(t => t.Customer)
+            .WithMany(t => t.Reservations)
+            .HasForeignKey(t => t.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder
+            .Entity<Reservation>()
             .HasOne(t => t.Table)
             .WithMany(t => t.Reservations)
             .HasForeignKey(t => t.TableId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder
+            .Entity<Reservation>()
+            .HasOne(t => t.Restaurant)
+            .WithMany(t => t.Reservations)
+            .HasForeignKey(t => t.RestaurantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder
+            .Entity<Table>()
+            .HasOne(t => t.Restaurant)
+            .WithMany(t => t.Tables)
+            .HasForeignKey(t => t.RestaurantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder
+            .Entity<Order>()
+            .HasOne(t => t.Employee)
+            .WithMany(t => t.Orders)
+            .HasForeignKey(t => t.EmployeeId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder
+            .Entity<Employee>()
+            .HasOne(t => t.Restaurant)
+            .WithMany(t => t.Employees)
+            .HasForeignKey(t => t.RestaurantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder
+            .Entity<MenuItem>()
+            .HasOne(t => t.Restaurant)
+            .WithMany(t => t.MenuItems)
+            .HasForeignKey(t => t.RestaurantId)
+            .OnDelete(DeleteBehavior.Cascade);
         
         modelBuilder
             .Entity<Order>()
