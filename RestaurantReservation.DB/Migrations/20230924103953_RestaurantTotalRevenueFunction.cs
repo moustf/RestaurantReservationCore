@@ -26,7 +26,7 @@ namespace RestaurantReservation.DB.Migrations
                             DECLARE @total_revenue DECIMAL(12, 4);
                     
                             SET @total_revenue = (
-                                SELECT AVG(o.TotalAmount) AS TotalAmount
+                                SELECT SUM(o.TotalAmount) AS TotalAmount
                                 FROM Reservations AS r
                                          INNER JOIN Orders AS o ON r.ReservationId = o.ReservationId
                                 WHERE r.RestaurantId = @restaurant_id
