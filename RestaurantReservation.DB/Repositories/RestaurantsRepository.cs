@@ -29,41 +29,30 @@ public class RestaurantsRepository
     
     public async Task AddNewRestaurant(Restaurant restaurant)
     {
-        if (!_restaurantContext.Restaurants.Any(r => r.PhoneNumber == restaurant.PhoneNumber))
-        {
-            await _restaurantContext.Restaurants.AddAsync(restaurant);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
+        if (_restaurantContext.Restaurants.Any(r => r.Name == restaurant.Name && r.PhoneNumber == restaurant.PhoneNumber))
             throw new RecordExistsException("The restaurant already exists in the database!");
+            
+        await _restaurantContext.Restaurants.AddAsync(restaurant);
+        await _restaurantContext.SaveChangesAsync();
         }
-    }
 
     public async Task DeleteRestaurant(Restaurant restaurant)
     {
-        if (_restaurantContext.Restaurants.Any(r => r.PhoneNumber == restaurant.PhoneNumber))
-        {
-            _restaurantContext.Restaurants.Remove(restaurant);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
+        if (!_restaurantContext.Restaurants.Any(r => r.Name == restaurant.Name && r.PhoneNumber == restaurant.PhoneNumber))
             throw new RecordDoesNotExistException("The restaurant does not exist in the database!");
+        
+        _restaurantContext.Restaurants.Remove(restaurant);
+        await _restaurantContext.SaveChangesAsync();
         }
-    }
 
     public async Task UpdateRestaurant(Restaurant restaurant)
     {
         var existingRestaurant = await _restaurantContext.Restaurants.FindAsync(restaurant.RestaurantId);
-        if (existingRestaurant is not null)
-        {
-            _restaurantContext.Entry(existingRestaurant).CurrentValues.SetValues(restaurant);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
+        
+        if (existingRestaurant is null)
             throw new RecordDoesNotExistException("The restaurant does not exist in the database!");
+        
+        _restaurantContext.Entry(existingRestaurant).CurrentValues.SetValues(restaurant);
+        await _restaurantContext.SaveChangesAsync();
         }
-    }
 }

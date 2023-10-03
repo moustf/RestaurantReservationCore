@@ -18,43 +18,32 @@ public class CustomersRepository
 
     public async Task AddNewCustomer(Customer customer)
     {
-        if (!_restaurantContext.Customers.Any(c => c.Email == customer.Email))
-        {
-            await _restaurantContext.Customers.AddAsync(customer);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
+        if (_restaurantContext.Customers.Any(c => c.Email == customer.Email))
             throw new RecordExistsException("The user already exists in the database!");
-        }
+
+        await _restaurantContext.Customers.AddAsync(customer);
+        await _restaurantContext.SaveChangesAsync();
     }
 
     public async Task DeleteCustomer(Customer customer)
     {
         if (_restaurantContext.Customers.Any(c => c.Email == customer.Email))
-        {
-            _restaurantContext.Customers.Remove(customer);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
             throw new RecordDoesNotExistException("The user does not exist in the database!");
-        }
+            
+        _restaurantContext.Customers.Remove(customer);
+        await _restaurantContext.SaveChangesAsync();
     }
 
     public async Task UpdateCustomer(Customer customer)
     {
         var existingCustomer = await _restaurantContext.Customers.FindAsync(customer.CustomerId);
-        if (existingCustomer is not null)
-        {
-            _restaurantContext.Entry(existingCustomer).CurrentValues.SetValues(customer);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
+        
+        if (existingCustomer is null)
             throw new RecordDoesNotExistException("The user does not exist in the database!");
+        
+        _restaurantContext.Entry(existingCustomer).CurrentValues.SetValues(customer);
+        await _restaurantContext.SaveChangesAsync();
         }
-    }
 
     public async Task<List<Customer>> CustomerReservationsWithPartySizeGreaterThan(int partySize)
     {

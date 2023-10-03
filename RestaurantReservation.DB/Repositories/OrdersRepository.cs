@@ -16,43 +16,33 @@ public class OrdersRepository
     
     public async Task AddNewOrder(Order order)
     {
-        if (!_restaurantContext.Orders.Any(o => o.OrderDate == order.OrderDate && o.TotalAmount == order.TotalAmount))
-        {
-            await _restaurantContext.Orders.AddAsync(order);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
+        if (_restaurantContext.Orders.Any(o => o.OrderDate == order.OrderDate && o.TotalAmount == order.TotalAmount))
             throw new RecordExistsException("The order already exists in the database!");
+        
+        await _restaurantContext.Orders.AddAsync(order);
+        await _restaurantContext.SaveChangesAsync();
         }
-    }
 
     public async Task DeleteOrder(Order order)
     {
-        if (_restaurantContext.Orders.Any(o => o.OrderDate == order.OrderDate && o.TotalAmount == order.TotalAmount))
-        {
-            _restaurantContext.Orders.Remove(order);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
+        if (!_restaurantContext.Orders.Any(o => o.OrderDate == order.OrderDate && o.TotalAmount == order.TotalAmount))
             throw new RecordDoesNotExistException("The order does not exist in the database!");
-        }
+        
+        _restaurantContext.Orders.Remove(order);
+        await _restaurantContext.SaveChangesAsync();
+        
     }
 
     public async Task UpdateOrder(Order order)
     {
         var existingOrder = await _restaurantContext.Orders.FindAsync(order.OrderId);
-        if (existingOrder is not null)
-        {
-            _restaurantContext.Entry(existingOrder).CurrentValues.SetValues(order);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
+        
+        if (existingOrder is null)
             throw new RecordDoesNotExistException("The order does not exist in the database!");
+        
+        _restaurantContext.Entry(existingOrder).CurrentValues.SetValues(order);
+        await _restaurantContext.SaveChangesAsync();
         }
-    }
     
     public List<Order> ListOrdersAndMenuItems(int reservationId)
     {

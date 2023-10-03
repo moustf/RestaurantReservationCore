@@ -16,42 +16,33 @@ public class EmployeeRepository
     
     public async Task AddNewEmployee(Employee employee)
     {
-        if (!_restaurantContext.Employees.Any(e => e.FirstName == employee.FirstName && e.LastName == employee.LastName))
-        {
-            await _restaurantContext.Employees.AddAsync(employee);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
+        if (_restaurantContext.Employees.Any(e => e.FirstName == employee.FirstName && e.LastName == employee.LastName))
             throw new RecordExistsException("The employee already exists in the database!");
-        }
+            
+        await _restaurantContext.Employees.AddAsync(employee);
+        await _restaurantContext.SaveChangesAsync();
     }
     
     public async Task DeleteEmployee(Employee employee)
     {
-        if (_restaurantContext.Employees.Any(e => e.FirstName == employee.FirstName && e.LastName == employee.LastName))
-        {
-            _restaurantContext.Employees.Remove(employee);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
+        if (!_restaurantContext.Employees.Any(e => e.FirstName == employee.FirstName && e.LastName == employee.LastName))
             throw new RecordDoesNotExistException("The employee does not exist in the database!");
-        }
+        
+        _restaurantContext.Employees.Remove(employee);
+        await _restaurantContext.SaveChangesAsync();
+         
+            
     }
     
     public async Task UpdateEmployee(Employee employee)
     {
         var existingEmployee = await _restaurantContext.Employees.FindAsync(employee.EmployeeId);
-        if (existingEmployee is not null)
-        {
-            _restaurantContext.Entry(existingEmployee).CurrentValues.SetValues(employee);
-            await _restaurantContext.SaveChangesAsync();
-        }
-        else
-        {
+        
+        if (existingEmployee is null)
             throw new RecordDoesNotExistException("The employee does not exist in the database!");
-        }
+        
+        _restaurantContext.Entry(existingEmployee).CurrentValues.SetValues(employee);
+        await _restaurantContext.SaveChangesAsync();
     }
     
     public List<Employee> ListManagers()
@@ -62,5 +53,22 @@ public class EmployeeRepository
     public async Task<decimal> CalculateAverageOrderAmount(int employeeId)
     {
         return await _restaurantContext.Orders.Where(o => o.EmployeeId == employeeId).AverageAsync(o => o.TotalAmount);
+    }
+
+    public async Task<List<Employee>> ListEmployeesWithRestaurants()
+    {
+        const string sql = """
+            SELECT EmployeeId,
+                   FullName,
+                   RestaurantId,
+                   Name,
+                   Address,
+                   PhoneNumber,
+                   OpeningHours
+            FROM
+                EmployeesWithRestaurant;
+        """;
+
+        return await _restaurantContext.Employees.FromSqlRaw(sql).ToListAsync();
     }
 }
